@@ -62,13 +62,13 @@ namespace OLXscraper.Controllers
             var result = new ProductsList();
             result.MyList = new List<Product>();
 
-            foreach (var urlAdress in urlList)
+            Parallel.ForEach(urlList, (urlAdress, state) =>
             {
                 var httpClient = new HttpClient();
-                var html = await httpClient.GetStringAsync(urlAdress);
+                var html = httpClient.GetStringAsync(urlAdress);
 
                 var htmlDocument = new HtmlDocument();
-                htmlDocument.LoadHtml(html);
+                htmlDocument.LoadHtml(html.Result);
 
 
                 var ProductList = htmlDocument.DocumentNode.Descendants(0)
@@ -82,7 +82,7 @@ namespace OLXscraper.Controllers
 
                 if (!test.Contains("search"))
                 {
-                    break;
+                    state.Break();
                 }
 
                 foreach (var ProductListItem in ProductList)
@@ -125,12 +125,91 @@ namespace OLXscraper.Controllers
                         Link = link.ToString().Trim('\r', '\t', '\n'),
                         Image = image.ToString().Trim('\r', '\t', '\n')
                     };
-                    if (result.MyList.Any(x => x.Title == newProduct.Title))
+                    try
+                    {
+                        if (result.MyList.Any(x => x.Title == newProduct.Title))
+                            continue;
+                    }
+                    catch (Exception)
+                    {
+
                         continue;
+                    }
+                    
                     result.MyList.Add(newProduct);
 
                 }
-            }
+            });
+
+            //foreach (var urlAdress in urlList)
+            //{
+            //    var httpClient = new HttpClient();
+            //    var html = await httpClient.GetStringAsync(urlAdress);
+
+            //    var htmlDocument = new HtmlDocument();
+            //    htmlDocument.LoadHtml(html);
+
+
+            //    var ProductList = htmlDocument.DocumentNode.Descendants(0)
+            //        .Where(n => n.HasClass("offer")).ToList();
+
+            //    var sb = new StringBuilder();
+
+            //    var test = htmlDocument.DocumentNode.Descendants("link")
+            //                .Select(node => node.GetAttributeValue("href", ""))
+            //                .FirstOrDefault();
+
+            //    if (!test.Contains("search"))
+            //    {
+            //        break;
+            //    }
+
+            //    foreach (var ProductListItem in ProductList)
+            //    {
+
+            //        string title;
+            //        string price;
+            //        string link;
+            //        string image;
+
+            //        try
+            //        {
+            //            title = ProductListItem.Descendants("a")
+            //                .Where(node => node.GetAttributeValue("data-cy", "")
+            //                .Equals("listing-ad-title")).FirstOrDefault()
+            //                .InnerHtml.Trim('\r', '\t', '\n');
+
+            //            price = ProductListItem.Descendants("p")
+            //                .Where(node => node.GetAttributeValue("class", "")
+            //                .Equals("price")).FirstOrDefault()
+            //                .InnerHtml.Trim('\r', '\t', '\n');
+
+            //            link = ProductListItem.Descendants("a")
+            //                .Select(node => node.GetAttributeValue("href", ""))
+            //                .FirstOrDefault().Trim();
+
+            //            image = ProductListItem.Descendants("img")
+            //                .Select(node => node.GetAttributeValue("src", ""))
+            //                .FirstOrDefault().Trim();
+            //        }
+            //        catch (Exception)
+            //        {
+            //            continue;
+            //        }
+
+            //        var newProduct = new Product()
+            //        {
+            //            Title = title.ToString().Trim('\r', '\t', '\n').Replace("<strong>", "").Replace("</strong>", "").Replace("&quot;", ""),
+            //            Price = price.ToString().Trim('\r', '\t', '\n').Replace("<strong>", "").Replace("</strong>", ""),
+            //            Link = link.ToString().Trim('\r', '\t', '\n'),
+            //            Image = image.ToString().Trim('\r', '\t', '\n')
+            //        };
+            //        if (result.MyList.Any(x => x.Title == newProduct.Title))
+            //            continue;
+            //        result.MyList.Add(newProduct);
+
+            //    }
+            //}
 
             return result;
         }

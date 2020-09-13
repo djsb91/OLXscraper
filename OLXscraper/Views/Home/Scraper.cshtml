@@ -1,0 +1,49 @@
+﻿@model OLXscraper.Models.ProductsList
+
+@{
+    ViewBag.Title = "List";
+}
+
+<style>
+    img {
+        height: 100px;
+    }
+
+    table {
+        border-collapse: collapse;
+    }
+
+        table tr td,
+        th {
+            border: 1px solid black;
+            padding: 10px;
+        }
+</style>
+
+<h2>Znaleziono: @Model.MyList.Count produktów</h2>
+
+@*<p>@Model.A</p>
+    <p>@Model.B</p>
+    <p>@(Model.A + Model.B)</p>
+    <h2>@Model.C</h2>
+
+    @foreach (var item in Model.MyList)
+    {
+        <p>@item</p>
+    }*@
+
+<p></p>
+<p></p>
+<table class="main-table">
+    @foreach (var item in Model.MyList)
+    {
+        <tr>
+            <td><img src="@item.Image" alt="Alternate Text" /></td>
+            <td><a href="@item.Link">@item.Title</a></td>
+            <td>@item.Price</td>
+            
+        </tr>
+    }
+</table>
+
+
