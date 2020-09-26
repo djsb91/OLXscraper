@@ -6,7 +6,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
 
 namespace OLXscraper.Controllers
@@ -135,11 +134,14 @@ namespace OLXscraper.Controllers
 
                         continue;
                     }
-                    
+
                     result.MyList.Add(newProduct);
 
                 }
             });
+
+
+            //NON ASYNC
 
             //foreach (var urlAdress in urlList)
             //{
@@ -210,6 +212,10 @@ namespace OLXscraper.Controllers
 
             //    }
             //}
+
+
+            //TODO: Order by price or search engine
+            result.MyList.OrderBy(p => p.Price);
 
             return result;
         }
