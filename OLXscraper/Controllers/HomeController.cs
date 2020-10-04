@@ -36,16 +36,14 @@ namespace OLXscraper.Controllers
             return Content("Hello" + id);
         }
 
-        public async Task<ActionResult> Scraper(string id)
+        public ActionResult Scraper(string id)
         {
-            ProductsList ProductsList = new ProductsList();
+            ProductsList productsList = new ProductsList();
 
-            ProductsList = await GetProductListFromOlxAsync(id);
-
-            return View(ProductsList);
+            return View(GetProductListFromOlx(productsList, id));
         }
 
-        public static async Task<ProductsList> GetProductListFromOlxAsync(string str)
+        public static ProductsList GetProductListFromOlx(ProductsList productsList, string str)
         {
             string url = ($"https://www.olx.pl/elektronika/komputery/katowice/q- {str} /?search%5Border%5D=filter_float_price%3Aasc&search%5Bdist%5D=5").Replace(" ", "");
             string urlPage2 = ($"https://www.olx.pl/elektronika/komputery/katowice/q- {str} /?search%5Border%5D=filter_float_price%3Aasc&search%5Bdist%5D=5").Replace(" ", "");
@@ -58,8 +56,8 @@ namespace OLXscraper.Controllers
                 urlList.Add(urlPage2);
             }
 
-            var result = new ProductsList();
-            result.MyList = new List<Product>();
+            productsList = new ProductsList();
+            productsList.MyList = new List<Product>();
 
             Parallel.ForEach(urlList, (urlAdress, state) =>
             {
@@ -126,7 +124,7 @@ namespace OLXscraper.Controllers
                     };
                     try
                     {
-                        if (result.MyList.Any(x => x.Title == newProduct.Title))
+                        if (productsList.MyList.Any(x => x.Title == newProduct.Title))
                             continue;
                     }
                     catch (Exception)
@@ -135,7 +133,7 @@ namespace OLXscraper.Controllers
                         continue;
                     }
 
-                    result.MyList.Add(newProduct);
+                    productsList.MyList.Add(newProduct);
 
                 }
             });
@@ -215,9 +213,10 @@ namespace OLXscraper.Controllers
 
 
             //TODO: Order by price or search engine
-            result.MyList.OrderBy(p => p.Price);
+            productsList.MyList = productsList.MyList.OrderBy(p => p.Price).ToList();
 
-            return result;
+
+            return productsList;
         }
     }
 }
